@@ -1,65 +1,98 @@
-import Image from "next/image";
+"use client"
+
+import * as React from "react"
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+import { CodeEditor } from "@/components/CodeEditor"
+import { LanguageSelect } from "@/components/LanguageSelect"
+import { ResultPanel } from "@/components/ResultPanel"
+import { ProblemPanel } from "@/components/ProblemPanel"
+import { Button } from "@/components/ui/button"
+import { Play } from "lucide-react"
 
 export default function Home() {
+  const [language, setLanguage] = React.useState("javascript")
+  const [code, setCode] = React.useState("// Write your code here\nconsole.log('Hello World!');")
+  const [output, setOutput] = React.useState("")
+  const [status, setStatus] = React.useState<"idle" | "running" | "success" | "error">("idle")
+
+  const handleRun = () => {
+    setStatus("running")
+    setOutput("Running code...\n")
+
+    // Simulation
+    setTimeout(() => {
+      setOutput("Hello World!\n")
+      setStatus("success")
+    }, 1000)
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="h-screen w-full flex flex-col overflow-hidden bg-background">
+      {/* Header */}
+      <header className="h-14 border-b flex items-center justify-between px-4 shrink-0 bg-card">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded bg-primary text-primary-foreground flex items-center justify-center font-bold">
+            W
+          </div>
+          <span className="font-bold text-lg">Wojo</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="flex items-center gap-2">
+          <LanguageSelect value={language} onValueChange={setLanguage} />
+          <Button size="sm" onClick={handleRun} disabled={status === "running"}>
+            <Play className="w-4 h-4 mr-2" />
+            Run
+          </Button>
+          <Button size="sm" variant="secondary" disabled>
+            Submit
+          </Button>
         </div>
-      </main>
-    </div>
-  );
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-hidden">
+        <ResizablePanelGroup orientation="horizontal">
+
+          {/* Problem Description */}
+          <ResizablePanel defaultSize={40} minSize={20}>
+            <ProblemPanel />
+          </ResizablePanel>
+
+          <ResizableHandle />
+
+          {/* Editor & Result */}
+          <ResizablePanel defaultSize={60} minSize={30}>
+            <ResizablePanelGroup orientation="vertical">
+
+              {/* Code Editor */}
+              <ResizablePanel defaultSize={70} minSize={30}>
+                <div className="h-full flex flex-col">
+                  <CodeEditor
+                    language={language}
+                    value={code}
+                    onChange={(value) => setCode(value || "")}
+                  />
+                </div>
+              </ResizablePanel>
+
+              <ResizableHandle />
+
+              {/* Result Panel */}
+              <ResizablePanel defaultSize={30} minSize={10}>
+                <ResultPanel
+                  status={status}
+                  output={output}
+                />
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </ResizablePanel>
+
+        </ResizablePanelGroup>
+      </div>
+    </main>
+  )
 }
