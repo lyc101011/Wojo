@@ -37,14 +37,6 @@ npm run dev
 
 Visit [http://localhost:3000](http://localhost:3000).
 
-## � Documentation
-
-For developers interested in the architecture or contributing:
-
-- [Architecture Design](planning/architecture.md)
-- [Technical Roadmap](planning/technical_roadmap.md)
-- [Product Plan](planning/product_plan.md)
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
