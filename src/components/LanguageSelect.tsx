@@ -29,7 +29,7 @@ export function LanguageSelect({ value, onValueChange }: LanguageSelectProps) {
             <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select Language" />
             </SelectTrigger>
-            <SelectContent className="max-h-[300px]">
+            <SelectContent position="popper" className="max-h-[none]">
                 {SUPPORTED_LANGUAGES.map((lang) => (
                     <SelectItem key={lang.id} value={lang.id}>
                         <span className="flex items-center gap-2">

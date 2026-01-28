@@ -2,9 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import { Problem } from '@/types/problem';
 
-const PROBLEMS_DIR = process.env.WOJO_PROBLEMS_DIR
-    ? path.resolve(process.cwd(), process.env.WOJO_PROBLEMS_DIR)
-    : path.join(process.cwd(), 'src/lib/problems');
+if (!process.env.WOJO_PROBLEMS_DIR) {
+    throw new Error('Missing environment variable: WOJO_PROBLEMS_DIR. Please check your .env file or configuration.');
+}
+
+const PROBLEMS_DIR = path.resolve(process.cwd(), process.env.WOJO_PROBLEMS_DIR);
 
 export function getProblems(): Problem[] {
     if (!fs.existsSync(PROBLEMS_DIR)) {
