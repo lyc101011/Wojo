@@ -1,9 +1,7 @@
 import { TestCase } from "@/types/problem";
 import { Runner, RunnerOutput } from "./types";
 
-export class JavascriptRunner implements Runner {
-    private worker: Worker | null = null;
-    private timeoutId: NodeJS.Timeout | null = null;
+export class PythonRunner implements Runner {
     private worker: Worker | null = null;
     private timeoutId: NodeJS.Timeout | null = null;
 
@@ -17,12 +15,15 @@ export class JavascriptRunner implements Runner {
                 this.worker.terminate();
             }
 
-            this.worker = new Worker('/wasm-worker.js');
+            this.worker = new Worker('/python-worker.js');
+
+            // 15s timeout for Python (loading pyodide can take time initially)
+            const timeoutDuration = 15000;
 
             const timeoutId = setTimeout(() => {
                 this.worker?.terminate();
-                reject(new Error("Execution timed out (10s limit)"));
-            }, 10000);
+                reject(new Error(`Execution timed out (${timeoutDuration / 1000}s limit)`));
+            }, timeoutDuration);
 
             this.worker.onmessage = (e) => {
                 clearTimeout(timeoutId);
@@ -43,11 +44,7 @@ export class JavascriptRunner implements Runner {
         });
     }
 
-    private cleanup() {
-        if (this.timeoutId) {
-            clearTimeout(this.timeoutId);
-            this.timeoutId = null;
-        }
+    terminate() {
         if (this.worker) {
             this.worker.terminate();
             this.worker = null;

@@ -13,7 +13,9 @@ import { ProblemPanel } from "@/components/ProblemPanel"
 import { Button } from "@/components/ui/button"
 import { Play } from "lucide-react"
 import { Problem } from "@/types/problem"
-import { JavascriptRunner, ExecutionResult } from "@/lib/runner/JavascriptRunner"
+import { JavascriptRunner } from "@/lib/runner/JavascriptRunner"
+import { PythonRunner } from "@/lib/runner/PythonRunner"
+import { Runner, ExecutionResult } from "@/lib/runner/types"
 import { toast } from "sonner"
 
 export default function Home() {
@@ -28,15 +30,29 @@ export default function Home() {
   const [executionTime, setExecutionTime] = React.useState<number>(0)
   const [mode, setMode] = React.useState<"run" | "submit">("run")
 
-  const runnerRef = React.useRef<JavascriptRunner | null>(null)
+  const runnerRef = React.useRef<Runner | null>(null)
 
-  // Initialize runner
+  // Initialize runner when language changes
   React.useEffect(() => {
-    runnerRef.current = new JavascriptRunner()
-    return () => {
-      // Cleanup handled in run method usually, but if we had global cleanup logic
+    // Cleanup previous runner if it has a terminate method
+    if (runnerRef.current?.terminate) {
+      runnerRef.current.terminate();
     }
-  }, [])
+
+    if (language === 'javascript') {
+      runnerRef.current = new JavascriptRunner();
+    } else if (language === 'python') {
+      runnerRef.current = new PythonRunner();
+    } else {
+      runnerRef.current = null; // Others not implemented yet
+    }
+
+    return () => {
+      if (runnerRef.current?.terminate) {
+        runnerRef.current.terminate();
+      }
+    }
+  }, [language])
 
   // Fetch problems
   React.useEffect(() => {
@@ -62,7 +78,7 @@ export default function Home() {
       if (template) {
         setCode(template.code)
       } else {
-        setCode("// No template for this language")
+        setCode(`// No template for ${language} yet`)
       }
       // Reset results
       setResults([])
@@ -73,7 +89,10 @@ export default function Home() {
   }, [problem, language])
 
   const executeCode = async (cases: Problem['testCases'], isSubmit: boolean = false) => {
-    if (!problem || !runnerRef.current) return
+    if (!problem || !runnerRef.current) {
+      toast.error("Runner not initialized for this language");
+      return;
+    }
 
     setMode(isSubmit ? "submit" : "run")
     setStatus("running")

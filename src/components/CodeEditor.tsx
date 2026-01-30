@@ -1,8 +1,15 @@
 "use client"
 
 import * as React from "react"
-import Editor, { OnMount } from "@monaco-editor/react"
+import Editor, { OnMount, loader } from "@monaco-editor/react"
 import { useTheme } from "next-themes"
+
+// Configure Monaco to load from local files instead of CDN
+loader.config({
+    paths: {
+        vs: "/monaco/vs"
+    }
+})
 
 interface CodeEditorProps {
     language: string
